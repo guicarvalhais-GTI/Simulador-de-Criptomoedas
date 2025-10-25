@@ -1,0 +1,556 @@
+d<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Simulador Cripto — Versão Criativa</title>
+<style>
+  :root{
+    --bg1:#0f1724;
+    --bg2:#071021;
+    --card:#0b1220cc;
+    --glass: rgba(255,255,255,0.04);
+    --accent:#5EEAD4; /* teal */
+    --accent-2:#60A5FA; /* blue */
+    --muted: #9AA8B2;
+    --glass-border: rgba(255,255,255,0.06);
+    --glass-2: rgba(255,255,255,0.03);
+    --text-primary: #E6EEF3;
+  }
+
+  .light-theme {
+    --bg1: #f8fafc;
+    --bg2: #e2e8f0;
+    --card: #ffffffcc;
+    --glass: rgba(0,0,0,0.04);
+    --accent: #5EEAD4; /* teal */
+    --accent-2: #60A5FA; /* blue */
+    --muted: #64748b;
+    --glass-border: rgba(0,0,0,0.06);
+    --glass-2: rgba(0,0,0,0.03);
+    --text-primary: #1e293b;
+  }
+  *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased;}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--text-primary)}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;}
+  .grid{display:grid;grid-template-columns:460px 420px;gap:28px;width:100%;max-width:980px;}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:18px;padding:22px;border:1px solid var(--glass-border);backdrop-filter: blur(6px);box-shadow: 0 10px 30px rgba(2,6,23,0.6);}
+  .brand{display:flex;gap:12px;align-items:center;margin-bottom:8px;justify-content:space-between}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-2),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;color:#042233;box-shadow:0 8px 30px rgba(96,165,250,0.12);font-size:18px}
+  .theme-toggle{width:40px;height:40px;border-radius:50%;background:var(--glass);border:1px solid var(--glass-border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted);transition:all 0.3s ease}
+  .theme-toggle:hover{background:rgba(94,234,212,0.1);border-color:#60A5FA;color:var(--text-primary)}
+  h2{font-size:1.25rem;margin:0;color:var(--text-primary)}
+  p.lead{margin:6px 0 16px;color:var(--muted);font-size:0.95rem}
+  label{display:block;font-size:0.9rem;color:var(--muted);margin-bottom:8px}
+  select,input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass);color:inherit;font-size:0.95rem;outline:none}
+  select:focus,input:focus{box-shadow:0 8px 30px rgba(96,165,250,0.08);border-color:rgba(96,165,250,0.35)}
+  .row{display:flex;gap:12px}
+  .metodos{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .chip{padding:8px 12px;border-radius:999px;background:transparent;border:1px solid var(--glass-border);cursor:pointer;color:var(--muted);font-weight:700;font-size:0.9rem}
+  .chip.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#042233;border:none;box-shadow:0 10px 30px rgba(96,165,250,0.12)}
+  .big-btn{width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(90deg,var(--accent-2),var(--accent));color:#042233;font-weight:800;font-size:1rem;cursor:pointer;margin-top:12px;box-shadow:0 10px 30px rgba(5,9,22,0.5)}
+  .big-btn:disabled{opacity:0.55;cursor:not-allowed}
+  .hint{font-size:0.82rem;color:var(--muted);margin-top:8px}
+  .small{font-size:0.84rem;color:var(--muted)}
+
+  .insights{display:flex;flex-direction:column;gap:16px;justify-content:space-between}
+  .summary{padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid var(--glass-border)}
+  .summary .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .coin{display:flex;align-items:center;gap:12px}
+  .coin-badge{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#042233, rgba(96,165,250,0.25));display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);font-size:18px}
+  .price{font-weight:800;font-size:1.15rem}
+  .meta{color:var(--muted);font-size:0.85rem}
+
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .metric{background:var(--glass-2);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);font-weight:800;color:#DFF6F1;font-size:0.92rem}
+  .metric .sub{font-size:0.72rem;color:var(--muted);font-weight:600}
+
+  .spark{height:96px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.02)}
+
+  .footer-actions{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:12px}
+  .light-btn{padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:var(--muted);cursor:pointer;font-weight:700}
+
+  
+/* Melhorias visuais extras */
+select, input{
+  background: rgba(20,30,45,0.95) !important;
+  border: 1px solid #5EEAD4 !important;
+  color: #EAF6FF !important;
+  transition: all 0.25s ease-in-out;
+}
+select option{
+  background: #0f1724 !important;
+  color: #EAF6FF !important;
+}
+select:focus, input:focus{
+  box-shadow: 0 0 8px rgba(94,234,212,0.6);
+  border-color: #60A5FA !important;
+}
+
+.big-btn:hover:not(:disabled){
+  transform: scale(1.02);
+  box-shadow: 0 12px 36px rgba(94,234,212,0.25);
+}
+  .light-btn:hover{
+    background: rgba(94,234,212,0.1);
+    border-color: #60A5FA;
+    color: var(--text-primary);
+  }
+
+  .light-theme .light-btn:hover{
+    background: rgba(94,234,212,0.1);
+    border-color: #60A5FA;
+    color: #1e293b;
+  }
+
+.chip{
+  transition: all 0.2s ease-in-out;
+}
+.chip:hover{
+  border-color: #60A5FA;
+  color: #EAF6FF;
+}
+
+.card{
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(2,6,23,0.7);
+}
+
+  /* responsive */
+  @media(max-width:940px){.grid{grid-template-columns:1fr;max-width:680px} .wrap{padding:18px} .coin-badge{width:48px;height:48px}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="grid">
+      <!-- CONTROLS -->
+      <div class="card" id="controls">
+        <div class="brand">
+          <div class="logo">CR</div>
+          <div>
+            <h2>Simulador Cripto</h2>
+            <p class="lead">Experimente comprar criptomoedas com dados reais — educativo e bonito.</p>
+          </div>
+        </div>
+
+        <label for="criptomoeda">Criptomoeda</label>
+        <select id="criptomoeda" aria-label="Escolher criptomoeda">
+          <option value="" disabled selected>Selecione...</option>
+          <option value="BTC">Bitcoin (BTC)</option>
+          <option value="ETH">Ethereum (ETH)</option>
+          <option value="SOL">Solana (SOL)</option>
+          <option value="USDT">Tether (USDT)</option>
+          <option value="BNB">Binance Coin (BNB)</option>
+          <option value="ADA">Cardano (ADA)</option>
+          <option value="DOGE">Dogecoin (DOGE)</option>
+          <option value="XRP">XRP (XRP)</option>
+          <option value="LTC">Litecoin (LTC)</option>
+          <option value="LINK">Chainlink (LINK)</option>
+        </select>
+
+        <div style="height:12px"></div>
+
+        <label for="exchange">Exchange</label>
+        <select id="exchange" aria-label="Escolher exchange" disabled>
+          <option value="" disabled selected>Selecione...</option>
+          <option value="Binance">Binance (CEX)</option>
+          <option value="Coinbase">Coinbase (CEX)</option>
+          <option value="Kraken">Kraken (CEX)</option>
+          <option value="MercadoBitcoin">Mercado Bitcoin (CEX)</option>
+          <option value="Uniswap">Uniswap (DEX)</option>
+          <option value="PancakeSwap">PancakeSwap (DEX)</option>
+        </select>
+
+        <div style="height:12px"></div>
+
+        <label for="valor">Valor em Reais (R$)</label>
+        <input type="number" id="valor" placeholder="Ex: 500" aria-label="Valor em reais" />
+
+        <div style="height:12px"></div>
+
+        <label for="periodo">Período de Investimento</label>
+        <select id="periodo" aria-label="Escolher período">
+          <option value="" disabled selected>Selecione...</option>
+          <option value="2m">2 meses</option>
+          <option value="3m">3 meses</option>
+          <option value="4m">4 meses</option>
+          <option value="5m">5 meses</option>
+          <option value="6m">6 meses</option>
+          <option value="7m">7 meses</option>
+          <option value="8m">8 meses</option>
+          <option value="9m">9 meses</option>
+          <option value="10m">10 meses</option>
+          <option value="11m">11 meses</option>
+          <option value="1y">1 ano</option>
+        </select>
+
+        <div style="height:12px"></div>
+
+        <label>Método de Pagamento</label>
+        <div class="metodos" id="metodos">
+          <div class="chip" data-metodo="PIX">PIX</div>
+          <div class="chip" data-metodo="Cartão">Cartão</div>
+          <div class="chip" data-metodo="TED">TED</div>
+          <div class="chip" data-metodo="DEX">DEX</div>
+        </div>
+
+        <div class="hint">Sem valor mínimo — simule qualquer quantia para aprendizado.</div>
+
+        <button class="big-btn" id="simular" disabled>Simular Investimento</button>
+
+        <div class="footer-actions">
+          <button class="light-btn" id="reiniciar" style="opacity:0.8;display:none">Reiniciar</button>
+          <div class="small">Dados: CoinGecko • Design criativo</div>
+        </div>
+      </div>
+
+      <!-- INSIGHTS -->
+      <div class="card insights" id="insights">
+        <div class="summary" id="summary">
+          <div class="top">
+            <div class="coin">
+              <div class="coin-badge" id="coinBadge">--</div>
+              <div>
+                <div id="coinName" style="font-weight:800">Selecione uma moeda</div>
+                <div class="meta" id="coinSymbol">—</div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div class="price" id="coinPrice">R$ --</div>
+              <div class="meta" id="priceUSD">USD --</div>
+            </div>
+          </div>
+
+          <div class="metrics" id="metrics" style="margin-top:16px;display:none">
+            <div class="metric">
+              <div>Market Cap</div>
+              <div class="sub" id="mktcap">--</div>
+            </div>
+            <div class="metric">
+              <div>Volume 24h</div>
+              <div class="sub" id="vol24">--</div>
+            </div>
+            <div class="metric">
+              <div>Oferta Circulante</div>
+              <div class="sub" id="circSupply">--</div>
+            </div>
+            <div class="metric">
+              <div>Supply Máx / Total</div>
+              <div class="sub" id="totalSupply">--</div>
+            </div>
+            <div class="metric">
+              <div>ATH</div>
+              <div class="sub" id="ath">--</div>
+            </div>
+            <div class="metric">
+              <div>ATL</div>
+              <div class="sub" id="atl">--</div>
+            </div>
+          </div>
+
+          <div class="spark" id="spark">Selecione e simule para ver métricas</div>
+        </div>
+
+        <div id="resultPanel" style="display:none">
+          <div class="summary" style="margin-top:8px;padding:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><strong>Simulação de Investimento</strong><div class="meta" style="font-size:0.85rem">Projeção futura</div></div>
+              <div class="meta" id="dominancia">—</div>
+            </div>
+            <div style="margin-top:12px">
+              <div id="simText" style="font-weight:800;font-size:1.05rem">—</div>
+              <div style="margin-top:8px;color:var(--muted)" id="feesText"></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+              <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;font-weight:800">Valor Futuro: <span id="simQty">--</span></div>
+              <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;font-weight:800">Investido: <span id="simSpent">--</span></div>
+              <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;font-weight:800">Variação: <span id="simFee">--</span></div>
+            </div>
+            <div style="margin-top:12px;color:var(--muted);font-size:0.85rem" id="extraInfo"></div>
+            <div style="margin-top:12px;color:#FFD700;font-size:0.85rem;font-weight:600" id="aviso">Este é um site educativo. As simulações são baseadas em dados históricos e não garantem resultados futuros. Não somos responsáveis por riscos associados a investimentos reais. Consulte um profissional financeiro antes de investir.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const criptSelect = document.getElementById('criptomoeda');
+  const exchSelect = document.getElementById('exchange');
+  const valorInput = document.getElementById('valor');
+  const periodoSelect = document.getElementById('periodo');
+  const chips = document.querySelectorAll('.chip');
+  const simBtn = document.getElementById('simular');
+  const reiniciarBtn = document.getElementById('reiniciar');
+  const coinBadge = document.getElementById('coinBadge');
+  const coinName = document.getElementById('coinName');
+  const coinSymbol = document.getElementById('coinSymbol');
+  const coinPrice = document.getElementById('coinPrice');
+  const priceUSD = document.getElementById('priceUSD');
+  const metrics = document.getElementById('metrics');
+  const mktcap = document.getElementById('mktcap');
+  const vol24 = document.getElementById('vol24');
+  const circSupply = document.getElementById('circSupply');
+  const totalSupply = document.getElementById('totalSupply');
+  const ath = document.getElementById('ath');
+  const atl = document.getElementById('atl');
+  const spark = document.getElementById('spark');
+  const resultPanel = document.getElementById('resultPanel');
+  const simText = document.getElementById('simText');
+  const feesText = document.getElementById('feesText');
+  const simQty = document.getElementById('simQty');
+  const simSpent = document.getElementById('simSpent');
+  const simFee = document.getElementById('simFee');
+  const extraInfo = document.getElementById('extraInfo');
+  const dominancia = document.getElementById('dominancia');
+
+  let coingeckoIds = {
+    BTC: 'bitcoin',
+    ETH: 'ethereum',
+    SOL: 'solana',
+    USDT: 'tether',
+    BNB: 'binancecoin',
+    ADA: 'cardano',
+    DOGE: 'dogecoin',
+    XRP: 'ripple',
+    LTC: 'litecoin',
+    LINK: 'chainlink'
+  };
+  let metodo = null;
+  let currentData = null;
+
+  function fmtBRL(v){ try { return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); } catch(e){ return 'R$ --'; } }
+  function fmtUSD(v){ try { return Number(v).toLocaleString('en-US',{style:'currency',currency:'USD'}); } catch(e){ return 'USD --'; } }
+  function small(v){ return v===null||v===undefined?'-':v; }
+
+  // Load coins and exchanges on page load (static now, no API)
+  function loadCoinsAndExchanges() {
+    // Coins and exchanges are now hardcoded in HTML and JS map
+    // No dynamic loading needed
+  }
+
+  // enable exchange when coin chosen
+  criptSelect.addEventListener('change', async ()=>{
+    exchSelect.disabled = false;
+    await loadCoinInfo(criptSelect.value);
+    checkEnable();
+  });
+
+  // Load data on page load
+  loadCoinsAndExchanges();
+
+  exchSelect.addEventListener('change', checkEnable);
+  valorInput.addEventListener('input', checkEnable);
+  periodoSelect.addEventListener('change', checkEnable);
+
+  chips.forEach(c=> c.addEventListener('click', ()=>{
+    chips.forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    metodo = c.getAttribute('data-metodo');
+    checkEnable();
+  }));
+
+  function checkEnable(){
+    const periodoOk = periodoSelect.value;
+    simBtn.disabled = !(criptSelect.value && exchSelect.value && valorInput.value && periodoOk && metodo);
+  }
+
+  async function loadCoinInfo(symbol){
+    const id = coingeckoIds[symbol];
+    if(!id) return;
+    // show loading
+    coinBadge.textContent = symbol;
+    coinName.textContent = 'Carregando...';
+    coinSymbol.textContent = '';
+    coinPrice.textContent = '—';
+    priceUSD.textContent = '';
+    metrics.style.display = 'none';
+    spark.textContent = 'Buscando dados...';
+
+    try{
+      const res = await fetch(`https://api.coingecko.com/api/v3/coins/${id}?localization=false&tickers=false&market_data=true&community_data=true&developer_data=false&sparkline=false`);
+      if(!res.ok) throw new Error('API');
+      const data = await res.json();
+      currentData = data;
+      coinBadge.textContent = (data.symbol||symbol).toUpperCase();
+      coinName.textContent = data.name || symbol;
+      coinSymbol.textContent = (data.symbol||'').toUpperCase();
+      const priceBRL = data.market_data.current_price.brl;
+      const priceUSDv = data.market_data.current_price.usd;
+      coinPrice.textContent = fmtBRL(priceBRL);
+      priceUSD.textContent = fmtUSD(priceUSDv);
+      // metrics
+      metrics.style.display = 'grid';
+      mktcap.textContent = fmtUSD(data.market_data.market_cap.usd);
+      vol24.textContent = fmtUSD(data.market_data.total_volume.usd);
+      circSupply.textContent = Number(data.market_data.circulating_supply || 0).toLocaleString();
+      totalSupply.textContent = `${small(data.market_data.total_supply?.toLocaleString())} / ${small(data.market_data.max_supply?.toLocaleString())}`;
+      ath.textContent = fmtUSD(data.market_data.ath.usd);
+      atl.textContent = fmtUSD(data.market_data.atl.usd);
+      spark.textContent = `Variações: 24h ${data.market_data.price_change_percentage_24h?.toFixed(2)||'-'}% • 7d ${data.market_data.price_change_percentage_7d?.toFixed(2)||'-'}%`;
+      dominancia.textContent = `Rank ${data.market_data.market_cap_rank||'-'}`;
+    }catch(err){
+      console.error(err);
+      // Fallback approximate data with reasonable prices
+      const fallbackPrices = {
+        BTC: { brl: 320000, usd: 60000 },
+        ETH: { brl: 16000, usd: 3000 },
+        SOL: { brl: 800, usd: 150 },
+        USDT: { brl: 5.6, usd: 1 },
+        BNB: { brl: 2000, usd: 375 },
+        ADA: { brl: 2, usd: 0.38 },
+        DOGE: { brl: 0.8, usd: 0.15 },
+        XRP: { brl: 3, usd: 0.56 },
+        LTC: { brl: 500, usd: 94 },
+        LINK: { brl: 100, usd: 19 }
+      };
+      const fallbackPrice = fallbackPrices[symbol] || { brl: 100, usd: 19 };
+      const fallbackData = {
+        name: symbol,
+        symbol: symbol,
+        market_data: {
+          current_price: fallbackPrice,
+          market_cap: { usd: 1000000000000 },
+          total_volume: { usd: 50000000000 },
+          circulating_supply: 21000000,
+          total_supply: 21000000,
+          max_supply: 21000000,
+          ath: { usd: fallbackPrice.usd * 2 },
+          atl: { usd: fallbackPrice.usd * 0.5 },
+          price_change_percentage_24h: 2.5,
+          price_change_percentage_7d: 5,
+          price_change_percentage_30d: 10,
+          price_change_percentage_1y: 50
+        },
+        market_cap_rank: 1
+      };
+      currentData = fallbackData;
+      coinName.textContent = `${symbol} (Dados aproximados - API indisponível)`;
+      coinPrice.textContent = fmtBRL(fallbackPrice.brl);
+      priceUSD.textContent = fmtUSD(fallbackPrice.usd);
+      metrics.style.display = 'grid';
+      mktcap.textContent = fmtUSD(fallbackData.market_data.market_cap.usd);
+      vol24.textContent = fmtUSD(fallbackData.market_data.total_volume.usd);
+      circSupply.textContent = fallbackData.market_data.circulating_supply.toLocaleString();
+      totalSupply.textContent = `${fallbackData.market_data.total_supply.toLocaleString()} / ${fallbackData.market_data.max_supply.toLocaleString()}`;
+      ath.textContent = fmtUSD(fallbackData.market_data.ath.usd);
+      atl.textContent = fmtUSD(fallbackData.market_data.atl.usd);
+      spark.textContent = `Variações aproximadas: 24h +2.5% • 7d +5%`;
+      dominancia.textContent = `Rank ${fallbackData.market_cap_rank}`;
+    }
+  }
+
+  simBtn.addEventListener('click', async ()=>{
+    if(!currentData){ alert('Selecione uma criptomoeda válida.'); return; }
+    const valor = parseFloat(valorInput.value);
+    if(isNaN(valor) || valor<=0){ alert('Insira um valor válido.'); return; }
+
+    let periodoDias = 0;
+    if (periodoSelect.value === '2m') periodoDias = 60;
+    else if (periodoSelect.value === '3m') periodoDias = 90;
+    else if (periodoSelect.value === '4m') periodoDias = 120;
+    else if (periodoSelect.value === '5m') periodoDias = 150;
+    else if (periodoSelect.value === '6m') periodoDias = 180;
+    else if (periodoSelect.value === '7m') periodoDias = 210;
+    else if (periodoSelect.value === '8m') periodoDias = 240;
+    else if (periodoSelect.value === '9m') periodoDias = 270;
+    else if (periodoSelect.value === '10m') periodoDias = 300;
+    else if (periodoSelect.value === '11m') periodoDias = 330;
+    else if (periodoSelect.value === '1y') periodoDias = 365;
+
+    simBtn.disabled = true;
+    simBtn.textContent = 'Simulando...';
+
+    const currentPrice = currentData.market_data.current_price.brl;
+    if (currentPrice <= 0) {
+      alert('Dados de preço indisponíveis. Tente selecionar outra criptomoeda ou recarregar a página.');
+      simBtn.textContent = 'Simular Investimento';
+      simBtn.disabled = false;
+      return;
+    }
+
+    let changePct = currentData.market_data.price_change_percentage_1y || 0;
+    let feesMsg = `Variação simulada baseada em histórico de 1 ano: ${changePct.toFixed(2)}%.`;
+
+    try {
+      const coinId = coingeckoIds[criptSelect.value];
+      if (!coinId) throw new Error('Invalid coin selected');
+      const hoje = new Date();
+      const dataInicio = new Date(hoje.getTime() - periodoDias * 24 * 60 * 60 * 1000);
+      const unixInicio = Math.floor(dataInicio.getTime() / 1000);
+      const unixFim = Math.floor(hoje.getTime() / 1000);
+      const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart/range?vs_currency=brl&from=${unixInicio}&to=${unixFim}`;
+      console.log('Fetching historical data URL:', url);
+      const histRes = await fetch(url);
+      console.log('Historical response status:', histRes.status);
+      if (!histRes.ok) throw new Error('Failed to load historical data');
+      const histData = await histRes.json();
+      console.log('Historical data received:', histData);
+      const prices = histData.prices;
+      console.log('Prices array length:', prices ? prices.length : 'no prices');
+      if (prices && prices.length >= 2) {
+        // Calculate average percentage change
+        const initialPrice = prices[0][1];
+        const finalPrice = prices[prices.length - 1][1];
+        changePct = ((finalPrice - initialPrice) / initialPrice) * 100;
+        feesMsg = `Variação simulada baseada em histórico: ${changePct.toFixed(2)}% no período passado.`;
+      }
+    } catch (err) {
+      console.error('Historical data error:', err);
+      // Use 1y fallback, already set
+      feesMsg = `Variação simulada baseada em histórico de 1 ano (erro ao carregar dados completos): ${changePct.toFixed(2)}%.`;
+    }
+
+    // Simulate future value
+    const futurePrice = currentPrice * (1 + changePct / 100);
+    const futureValue = (valor / currentPrice) * futurePrice;
+    const variation = ((futureValue - valor) / valor) * 100;
+
+    // prepare display
+    simText.textContent = `Em ${periodoSelect.options[periodoSelect.selectedIndex].text}, seu investimento de ${fmtBRL(valor)} em ${currentData.name} poderia valer ${fmtBRL(futureValue)}.`;
+    feesText.textContent = feesMsg;
+    simQty.textContent = fmtBRL(futureValue);
+    simSpent.textContent = fmtBRL(valor);
+    simFee.textContent = (variation >= 0 ? '+' : '') + variation.toFixed(2) + '%';
+    extraInfo.innerHTML = `Preço atual: <strong>${fmtBRL(currentPrice)}</strong> (${fmtUSD(currentData.market_data.current_price.usd)})<br>
+                           Preço projetado: <strong>${fmtBRL(futurePrice)}</strong><br>
+                           Market Cap: <strong>${fmtUSD(currentData.market_data.market_cap.usd)}</strong><br>
+                           Volume 24h: <strong>${fmtUSD(currentData.market_data.total_volume.usd)}</strong><br>
+                           Variações recentes: 24h <strong>${currentData.market_data.price_change_percentage_24h?.toFixed(2)||'-'}%</strong>, 7d <strong>${currentData.market_data.price_change_percentage_7d?.toFixed(2)||'-'}%</strong>, 30d <strong>${currentData.market_data.price_change_percentage_30d?.toFixed(2)||'-'}%</strong>, 1y <strong>${currentData.market_data.price_change_percentage_1y?.toFixed(2)||'-'}%</strong>`;
+
+    resultPanel.style.display = 'block';
+    simBtn.textContent = 'Simular Investimento';
+    simBtn.disabled = false;
+    reiniciarBtn.style.display = 'inline-block';
+    reiniciarBtn.style.opacity = 1;
+  });
+
+  reiniciarBtn.addEventListener('click', ()=>{
+    criptSelect.value='';
+    exchSelect.value='';
+    exchSelect.disabled = true;
+    valorInput.value='';
+    periodoSelect.value='';
+    chips.forEach(x=>x.classList.remove('active'));
+    metodo = null;
+    simBtn.disabled = true;
+    resultPanel.style.display = 'none';
+    metrics.style.display = 'none';
+    coinBadge.textContent='--';
+    coinName.textContent='Selecione uma moeda';
+    coinSymbol.textContent='—';
+    coinPrice.textContent='R$ --';
+    priceUSD.textContent='USD --';
+    spark.textContent='Selecione e simule para ver métricas';
+    reiniciarBtn.style.display = 'none';
+  });
+
+})();
+</script>
+</body>
+</html>
